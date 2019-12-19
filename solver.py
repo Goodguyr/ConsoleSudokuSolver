@@ -1,4 +1,5 @@
 from random import randint
+from getSudoku import sudokuInfo
 
 def makeField():
     '''
@@ -81,8 +82,8 @@ def getVertical(field, pos):
 def checkForSame(nums):
     '''
     Checks if array of numbers has duplicate elements
-       returns False if no duplicates
-       returns True if duplictes are found 
+    returns False if no duplicates
+   returns True if duplictes are found 
     '''
     newList = []
     for i in nums:
@@ -108,8 +109,8 @@ def getEmptyPositions(field):
     '''
     emptyPositions = []
     for line in range(len(field)):
-        for third in range(len(line)):
-            for place in range(len(third)):
+        for third in range(len(field[line])):
+            for place in range(len(field[line][third])):
                 if field[line][third][place] == 0:
                     emptyPositions.append([line,third,place])
     return emptyPositions
@@ -165,6 +166,9 @@ def generateSudoku(field):
         placeNum = checkIfAllowed(placeNum, hrz, vrt, sqr)
         x, y, z = randPos[0], randPos[1], randPos[2]
         sudoku[x][y][z] = placeNum
+
+#def solveMySudoku(field):
+
 
 generateSudoku(sudoku)
 
