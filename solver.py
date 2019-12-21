@@ -125,10 +125,9 @@ def sudokuSolver(field):
     if len(emptyPositions) != 0:
         return sudokuSolver(field)
 
-filledSudoku = getSudoku()
-
 print()
 print("Unsolved sudoku")
+filledSudoku = getSudoku()
 printer(filledSudoku)
 print("---------------------------------")
 print("Solution:")
