@@ -1,1 +1,4 @@
 /mightBreak.py
+/.gitignore
+/.vscode
+/__pycache__
