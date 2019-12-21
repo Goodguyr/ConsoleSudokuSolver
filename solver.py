@@ -1,5 +1,5 @@
 from random import randint
-from getSudoku import sudokuInfo
+from getSudoku import getSudoku
 
 def makeField():
     '''
@@ -26,14 +26,6 @@ def printer(array):
     for i in array:
         print(i)
 
-
-#x y z coordinates for position 
-#x - chooses in which line the num is, x ranges from 0 to 8
-#y - chooses in which box the number is, y ranges from 0 to 2
-#z - chooses in which position the number is, z ranges from 0 to 2
-#coordinate will be sent as [x,y,z]
-
-
 def getSquares(field, pos):
     '''
     returns all numbers in the corresponding square for the number
@@ -44,17 +36,19 @@ def getSquares(field, pos):
     if x < 3:
         for i in range(3):
             for n in range(3):
-                numsInSquare.append(field[i][y][n])
+                if field[i][y][n] != 0:
+                    numsInSquare.append(field[i][y][n])
     elif x < 6:
         for i in range(3,6):
             for n in  range(3):
-                numsInSquare.append(field[i][y][n])
+                if field[i][y][n] != 0:
+                    numsInSquare.append(field[i][y][n])
     else:
         for i in range(6,9):
             for n in range(3):
-                numsInSquare.append(field[i][y][n])
+                if field[i][y][n] != 0:
+                    numsInSquare.append(field[i][y][n])
     return numsInSquare
-
 
 def getHorizontal(field, pos):
     '''
@@ -64,7 +58,8 @@ def getHorizontal(field, pos):
     numbers = []
     for i in field[x]:
         for nums in i:
-            numbers.append(nums)
+            if nums != 0:
+                numbers.append(nums)
     return numbers
 
 def getVertical(field, pos):
@@ -75,9 +70,9 @@ def getVertical(field, pos):
     z = pos[2]
     numbers = []
     for i in range(len(field)):
-        numbers.append(field[i][y][z])
+        if field[i][y][z] != 0:
+            numbers.append(field[i][y][z])
     return numbers
-
 
 def checkForSame(nums):
     '''
@@ -85,22 +80,10 @@ def checkForSame(nums):
     returns False if no duplicates
    returns True if duplictes are found 
     '''
-    newList = []
-    for i in nums:
-        if i != 0:
-            newList.append(i)
+    newList = nums
     if len(newList) == len(set(newList)):
         return False
     return True
-
-
-"""
-get possible values from square
-get possible values from horizontal
-get possible values from vertical
-
-pick option with smallest amount of options
-"""
 
 def getEmptyPositions(field):
     '''
@@ -115,62 +98,68 @@ def getEmptyPositions(field):
                     emptyPositions.append([line,third,place])
     return emptyPositions
 
-
-#def leastOptions(emptyPos, field):
-
-def getRandPosition():
-    x, y, z = randint(0,8), randint(0,2), randint(0,2)
-    return [x,y,z]
-
-def checkIfEmpty(pos):
+def leastOptions(emptyPos, field):
     '''
-    Checks if position already contains a number
-    if not offers a new empty position
-    returns empty position
+    Finds which empty positions have smallest amount of possible answers
+    returns an array with position of the field with smallest amount of possible answers
     '''
-    x = pos[0]
-    y = pos[1]
-    z = pos[2]
-    if sudoku[x][y][z] != 0:
-        nextPos = getRandPosition()
-        return checkIfEmpty(nextPos)
-    return pos
+    bestSqrs = []
+    for onePos in emptyPos:
+        if 9 - len(getHorizontal(field, onePos)) <= 4:
+            bestSqrs.append(onePos)
+        elif 9 - len(getVertical(field, onePos)) <= 4:
+            bestSqrs.append(onePos)
+    return bestSqrs
 
-def checkIfAllowed(num, h, v, sq):
-    '''
-    checks if a number is allowed 
-    if not returns an allowed number
-    '''
-    if not(num in h) and not(num in v) and not(num in sq):
-        return num
-    nextNum = randint(1,9)
-    return checkIfAllowed(nextNum, h, v, sq)
+def getAllowedNums(pos, field):
+    allowed = []
+    for num in range(1,10):
+        if num not in getHorizontal(field, pos) and num not in getVertical(field, pos) and num not in getSquares(field, pos):
+            allowed.append(num)
+    return allowed
 
+def findRelatives(best):
+    x = best[0][0]
+    y = best[0][1]
+    z = best[0][2]
+    relatives = [best[0]]
+    for pos in best[1:]:
+        if pos[1] == y and pos[2] == z:
+            relatives.append(pos)
+        elif pos[0] == x:
+            relatives.append(pos)
+    return relatives
 
-def generateSudoku(field):
-    '''
-    function will generate 30 random clues
-    minimum amount of clues for a sudoku to be solvable is 17
-    30 clues is considered as a hard difficulty sudoku
+def placeNum(field, pos, num):
+    x, y, z = pos[0], pos[1], pos[2]
+    field[x][y][z] = num
 
-    '''
-    numOfClues = 30
+def sudokuSolver(field):
+    emptyPositions = getEmptyPositions(field)
+    least = leastOptions(emptyPositions, field)
+    counter = 0
+    for position in least:
+        allowedNums = getAllowedNums(position, field)
+        if len(allowedNums) == 1:
+            placeNum(field, position, allowedNums[0])
+        else:
+            counter = counter + 1
+    if counter == len(least) and counter != 0:
+        position = least[0]
+        allowedNums = getAllowedNums(position, field)
+        placeNum(field, position, allowedNums[0])
+    if len(emptyPositions) != 0:
+        return sudokuSolver(field)
 
-    for i in range(numOfClues):
-        randPos = getRandPosition()
-        randPos = checkIfEmpty(randPos)
-        hrz = getHorizontal(field, randPos)
-        vrt = getVertical(field, randPos)
-        sqr = getSquares(field, randPos)
-        placeNum = randint(1,9)
-        placeNum = checkIfAllowed(placeNum, hrz, vrt, sqr)
-        x, y, z = randPos[0], randPos[1], randPos[2]
-        sudoku[x][y][z] = placeNum
+filledSudoku = getSudoku()
 
-#def solveMySudoku(field):
-
-
-generateSudoku(sudoku)
-
-
+print()
+print("Generates an empty sudoku field:")
 printer(sudoku)
+print("---------------------------------")
+print("Fills empty sudoku field with scraped sudoku:")
+printer(filledSudoku)
+print("---------------------------------")
+print("Solution:")
+sudokuSolver(filledSudoku)
+printer(filledSudoku)
