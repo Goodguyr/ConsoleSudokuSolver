@@ -1,26 +1,6 @@
 from random import randint
 from getSudoku import getSudoku
 
-def makeField():
-    '''
-    Creates and returns an array containing 9 arrays
-    containing 3 arrays each
-    containing 3 placeholders for 0
-    One line --> [[0,0,0],[0,0,0],[0,0,0]]
-    '''
-    field =[]
-    for numOfLines in range(9):
-        line = []
-        field.append(line)
-        for numOfSquares in range(3):
-            square = []
-            line.append(square)
-            for spaceHolders in range(3):
-                square.append(0)
-    return field
-
-sudoku = makeField()
-
 def printer(array):
     '''Prints fields in a 3x3 format'''
     for i in array:
@@ -112,29 +92,23 @@ def leastOptions(emptyPos, field):
     return bestSqrs
 
 def getAllowedNums(pos, field):
+    '''Returns a list of numbers which are allowed in a position'''
     allowed = []
     for num in range(1,10):
         if num not in getHorizontal(field, pos) and num not in getVertical(field, pos) and num not in getSquares(field, pos):
             allowed.append(num)
     return allowed
 
-def findRelatives(best):
-    x = best[0][0]
-    y = best[0][1]
-    z = best[0][2]
-    relatives = [best[0]]
-    for pos in best[1:]:
-        if pos[1] == y and pos[2] == z:
-            relatives.append(pos)
-        elif pos[0] == x:
-            relatives.append(pos)
-    return relatives
-
 def placeNum(field, pos, num):
+    '''Places a number in the sudoku field'''
     x, y, z = pos[0], pos[1], pos[2]
     field[x][y][z] = num
 
 def sudokuSolver(field):
+    '''
+    Places numbers where only 1 number is possible
+    When no places with one possible option exists checks the field till its solved
+    '''
     emptyPositions = getEmptyPositions(field)
     least = leastOptions(emptyPositions, field)
     counter = 0
@@ -154,10 +128,7 @@ def sudokuSolver(field):
 filledSudoku = getSudoku()
 
 print()
-print("Generates an empty sudoku field:")
-printer(sudoku)
-print("---------------------------------")
-print("Fills empty sudoku field with scraped sudoku:")
+print("Unsolved sudoku")
 printer(filledSudoku)
 print("---------------------------------")
 print("Solution:")
