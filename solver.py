@@ -85,9 +85,9 @@ def leastOptions(emptyPos, field):
     '''
     bestSqrs = []
     for onePos in emptyPos:
-        if 9 - len(getHorizontal(field, onePos)) <= 4:
+        if 9 - len(getHorizontal(field, onePos)) <= 3:
             bestSqrs.append(onePos)
-        elif 9 - len(getVertical(field, onePos)) <= 4:
+        elif 9 - len(getVertical(field, onePos)) <= 3:
             bestSqrs.append(onePos)
     return bestSqrs
 
@@ -125,11 +125,21 @@ def sudokuSolver(field):
     if len(emptyPositions) != 0:
         return sudokuSolver(field)
 
-print()
-print("Unsolved sudoku")
-filledSudoku = getSudoku()
-printer(filledSudoku)
-print("---------------------------------")
-print("Solution:")
-sudokuSolver(filledSudoku)
-printer(filledSudoku)
+def showTheAnswer():
+    filledSudoku = getSudoku()
+    solvedSudoku = filledSudoku
+    sudokuSolver(solvedSudoku)
+    print()
+    print("Unsolved sudoku")
+    printer(filledSudoku)
+    print("---------------------------------")
+    print("Solution:")
+    printer(solvedSudoku)
+
+def checkError():
+    try:
+        showTheAnswer()
+    except:
+        return checkError()
+
+checkError()
