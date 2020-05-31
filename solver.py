@@ -54,17 +54,6 @@ def getVertical(field, pos):
             numbers.append(field[i][y][z])
     return numbers
 
-def checkForSame(nums):
-    '''
-    Checks if array of numbers has duplicate elements
-    returns False if no duplicates
-   returns True if duplictes are found 
-    '''
-    newList = nums
-    if len(newList) == len(set(newList)):
-        return False
-    return True
-
 def getEmptyPositions(field):
     '''
     Goes through all positions in the field
@@ -77,19 +66,6 @@ def getEmptyPositions(field):
                 if field[line][third][place] == 0:
                     emptyPositions.append([line,third,place])
     return emptyPositions
-
-def leastOptions(emptyPos, field):
-    '''
-    Finds which empty positions have smallest amount of possible answers
-    returns an array with position of the field with smallest amount of possible answers
-    '''
-    bestSqrs = []
-    for onePos in emptyPos:
-        if 9 - len(getHorizontal(field, onePos)) <= 3:
-            bestSqrs.append(onePos)
-        elif 9 - len(getVertical(field, onePos)) <= 3:
-            bestSqrs.append(onePos)
-    return bestSqrs
 
 def getAllowedNums(pos, field):
     '''Returns a list of numbers which are allowed in a position'''
@@ -104,42 +80,45 @@ def placeNum(field, pos, num):
     x, y, z = pos[0], pos[1], pos[2]
     field[x][y][z] = num
 
-def sudokuSolver(field):
+def helper(field):
     '''
     Places numbers where only 1 number is possible
-    When no places with one possible option exists checks the field till its solved
     '''
     emptyPositions = getEmptyPositions(field)
-    least = leastOptions(emptyPositions, field)
-    counter = 0
-    for position in least:
-        allowedNums = getAllowedNums(position, field)
-        if len(allowedNums) == 1:
-            placeNum(field, position, allowedNums[0])
-        else:
-            counter = counter + 1
-    if counter == len(least) and counter != 0:
-        position = least[0]
-        allowedNums = getAllowedNums(position, field)
-        placeNum(field, position, allowedNums[0])
+    numPlaced = False
+    for position in emptyPositions:
+        avialableNums = getAllowedNums(position, field)
+        if len(avialableNums) == 1:
+            placeNum(field, position, avialableNums[0])
+            numPlaced = True
+    if numPlaced:
+        helper(field)
+
+def sudokuSolver(field):
+    '''
+    Uses helper function to fill all the spaces with 1 avialable option.
+    When only positions with multiple options are avialable places one of avialable numbers and tries to finish the solution
+    If solution cannot be finished all changes that were made are reversed and the next possible number for the position is entered
+    '''
+    helper(field)
+    emptyPositions = getEmptyPositions(field)
     if len(emptyPositions) != 0:
-        return sudokuSolver(field)
+        for position in emptyPositions:
+            allowedNums = getAllowedNums(position, field)
+            for num in allowedNums:
+                placeNum(field, position, num)
+                sudokuSolver(field)
+                placeNum(field, position, 0)
+    helper(field)
 
 def showTheAnswer():
     filledSudoku = getSudoku()
-    solvedSudoku = filledSudoku
-    sudokuSolver(solvedSudoku)
     print()
     print("Unsolved sudoku")
     printer(filledSudoku)
     print("---------------------------------")
     print("Solution:")
-    printer(solvedSudoku)
+    sudokuSolver(filledSudoku)
+    printer(filledSudoku)
 
-def checkError():
-    try:
-        showTheAnswer()
-    except:
-        return checkError()
-
-checkError()
+showTheAnswer()
